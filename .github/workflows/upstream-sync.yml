@@ -47,7 +47,6 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          source: upstream-sync
           base: main
           title: 'Sync with upstream'
           body: 'Automated pull request to merge updates from upstream.'
