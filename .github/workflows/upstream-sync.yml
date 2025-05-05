@@ -23,8 +23,9 @@ jobs:
         with:
           target_sync_branch: upstream-sync
           target_repo_token: ${{ secrets.UPSTREAM_PAT }}
+          target_repo_url: https://Basit-raza01:${{ secrets.UPSTREAM_PAT }}@github.com/Oxeltech-GmbH/test-upstream.git
           upstream_sync_branch: main
-          upstream_sync_repo: Basit-raza01/test-upstream  # Changed upstream repository
+          upstream_sync_repo: Basit-raza01/test-upstream
 
       - name: Show sync result
         run: echo '${{ steps.sync.outputs.has_new_commits }}'
