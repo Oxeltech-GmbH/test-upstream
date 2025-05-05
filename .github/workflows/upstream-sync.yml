@@ -22,7 +22,7 @@ jobs:
         uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
         with:
           target_sync_branch: upstream-sync
-          target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+          target_repo_token: ${{ secrets.UPSTREAM_PAT }}
           upstream_sync_branch: main
           upstream_sync_repo: Basit-raza01/test-upstream  # Changed upstream repository
 
