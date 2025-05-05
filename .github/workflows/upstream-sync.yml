@@ -15,6 +15,7 @@ jobs:
         with:
           ref: upstream-sync
           fetch-depth: 0
+          persist-credentials: false  # ❗️ disable default token injection
 
       - name: Set up Git identity
         run: |
@@ -30,7 +31,7 @@ jobs:
         run: |
           git merge --no-edit upstream/main || echo "Nothing to merge"
 
-      - name: Force push using PAT-authenticated remote
+      - name: Push changes using PAT
         run: |
           git remote set-url origin https://Basit-raza01:${{ secrets.UPSTREAM_PAT }}@github.com/Oxeltech-GmbH/test-upstream.git
           git push origin upstream-sync
