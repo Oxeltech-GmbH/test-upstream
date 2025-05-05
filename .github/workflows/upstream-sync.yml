@@ -15,6 +15,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: upstream-sync
+          fetch-depth: 0  # Make sure full history is available
 
       - name: Sync upstream changes
         id: sync
@@ -47,7 +48,7 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          source: upstream-sync
+          branch: upstream-sync      
           base: main
           title: 'Sync with upstream'
           body: 'Automated pull request to merge updates from upstream.'
