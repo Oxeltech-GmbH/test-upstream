@@ -2,45 +2,36 @@ name: Sync with upstream and create pull request
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Every day at midnight UTC
-  workflow_dispatch:
+    - cron: '0 0 * * *'  # every day at midnight UTC
+  workflow_dispatch:       # allow manual trigger
 
 jobs:
   sync_with_upstream:
     runs-on: ubuntu-latest
+    name: Sync test-upstream with upstream/main
 
     steps:
       - name: Checkout upstream-sync branch
         uses: actions/checkout@v4
         with:
           ref: upstream-sync
-          fetch-depth: 0
-          persist-credentials: false  # ❗️ disable default token injection
 
-      - name: Set up Git identity
-        run: |
-          git config user.name "GitHub Bot"
-          git config user.email "actions@github.com"
+      - name: Sync upstream changes
+        id: sync
+        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
+        with:
+          target_sync_branch: upstream-sync
+          target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+          upstream_sync_branch: main
+          upstream_sync_repo: Basit-raza01/test-upstream  # Changed upstream repository
 
-      - name: Add upstream remote and fetch
-        run: |
-          git remote add upstream https://github.com/Basit-raza01/test-upstream.git
-          git fetch upstream
-
-      - name: Merge upstream/main into upstream-sync
-        run: |
-          git merge --no-edit upstream/main || echo "Nothing to merge"
-
-      - name: Push changes using PAT
-        run: |
-          git remote set-url origin https://Basit-raza01:${{ secrets.UPSTREAM_PAT }}@github.com/Oxeltech-GmbH/test-upstream.git
-          git push origin upstream-sync
-        env:
-          GIT_ASKPASS: echo
-          GIT_TERMINAL_PROMPT: 0
+      - name: Show sync result
+        run: echo '${{ steps.sync.outputs.has_new_commits }}'
 
   create_pull_request:
     runs-on: ubuntu-latest
+    name: Create a pull request into main
+
     needs: sync_with_upstream
 
     steps:
@@ -49,14 +40,14 @@ jobs:
         with:
           ref: main
 
-      - name: Fetch upstream-sync
+      - name: Fetch synced branch
         run: git fetch origin upstream-sync:upstream-sync
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          branch: upstream-sync
+          source: upstream-sync
           base: main
           title: 'Sync with upstream'
           body: 'Automated pull request to merge updates from upstream.'
