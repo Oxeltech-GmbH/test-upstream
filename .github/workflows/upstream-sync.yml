@@ -1,34 +1,42 @@
-sync_with_upstream:
-  runs-on: ubuntu-latest
+name: Sync with upstream and create pull request
 
-  steps:
-    - name: Checkout upstream-sync branch
-      uses: actions/checkout@v4
-      with:
-        ref: upstream-sync
-        fetch-depth: 0
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Every day at midnight UTC
+  workflow_dispatch:
 
-    - name: Set up Git identity
-      run: |
-        git config user.name "GitHub Bot"
-        git config user.email "actions@github.com"
+jobs:
+  sync_with_upstream:
+    runs-on: ubuntu-latest
 
-    - name: Add upstream remote
-      run: git remote add upstream https://github.com/Basit-raza01/test-upstream.git
+    steps:
+      - name: Checkout upstream-sync branch
+        uses: actions/checkout@v4
+        with:
+          ref: upstream-sync
+          fetch-depth: 0
 
-    - name: Fetch upstream
-      run: git fetch upstream
+      - name: Set up Git identity
+        run: |
+          git config user.name "GitHub Bot"
+          git config user.email "actions@github.com"
 
-    - name: Merge upstream/main into upstream-sync
-      run: |
-        git merge --no-edit upstream/main || echo "Nothing to merge"
+      - name: Add upstream remote and fetch
+        run: |
+          git remote add upstream https://github.com/Basit-raza01/test-upstream.git
+          git fetch upstream
 
-    - name: Push changes with PAT
-      env:
-        TOKEN: ${{ secrets.UPSTREAM_PAT }}
-      run: |
-        git remote set-url origin https://Basit-raza01:${TOKEN}@github.com/Oxeltech-GmbH/test-upstream.git
-        git push origin upstream-sync
+      - name: Merge upstream/main into upstream-sync
+        run: |
+          git merge --no-edit upstream/main || echo "Nothing to merge"
+
+      - name: Force push using PAT-authenticated remote
+        run: |
+          git remote set-url origin https://Basit-raza01:${{ secrets.UPSTREAM_PAT }}@github.com/Oxeltech-GmbH/test-upstream.git
+          git push origin upstream-sync
+        env:
+          GIT_ASKPASS: echo
+          GIT_TERMINAL_PROMPT: 0
 
   create_pull_request:
     runs-on: ubuntu-latest
